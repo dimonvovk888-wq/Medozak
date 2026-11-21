@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Расписание и дедлайны — Б4126-46.03.01риа</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f3f6fb;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .modal-backdrop {
+      animation: fadeIn 0.16s ease-out;
+    }
+    .modal-panel {
+      animation: slideUp 0.18s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .toast-enter {
+      animation: toastSlide 0.2s ease-out;
+    }
+    @keyframes toastSlide {
+      from { opacity: 0; transform: translate(-50%, 12px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-sm">
+    <div class="max-w-5xl mx-auto px-3 sm:px-5 pt-3 pb-2.5">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm">
+            ДВ
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">Расписание и дедлайны</h1>
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                Б4126-46.03.01риа
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 flex items-center gap-1.5">
+              <span>23.11 – 28.11</span>
+              <span>•</span>
+              <span id="headerStats">Загрузка...</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="btnAddTaskQuick" type="button"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition cursor-pointer">
+            <i data-lucide="list-plus" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Задание</span>
+          </button>
+          <button id="btnAddClass" type="button"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Предмет</span>
+          </button>
+          <button id="btnTelegramModal" type="button" title="Отправить в Telegram или поделиться"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium bg-sky-500 text-white hover:bg-sky-600 transition shadow-sm cursor-pointer">
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Telegram</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Day & View Navigation Strip -->
+      <div class="mt-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" id="navStrip">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto px-3 sm:px-5 pt-4">
+    <!-- Subtle helper bar -->
+    <div class="mb-4 flex items-center justify-between gap-2 flex-wrap text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span>Есть что сдать</span>
+        </span>
+        <span class="text-slate-300">|</span>
+        <span class="inline-flex items-center gap-1">
+          <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5 text-blue-600"></i>
+          <span>Нажмите на предмет, чтобы изменить описание или задания</span>
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="inline-flex items-center gap-1.5 cursor-pointer select-none text-slate-600 hover:text-slate-900">
+          <input type="checkbox" id="toggleOnlyDeadlines" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+          <span>Только со сдачей</span>
+        </label>
+        <button id="btnResetConfirm" type="button" class="text-slate-400 hover:text-rose-600 transition underline decoration-dotted cursor-pointer">
+          Сбросить
+        </button>
+      </div>
+    </div>
+
+    <!-- Schedule Container -->
+    <div id="scheduleRoot" class="space-y-4">
+      <!-- Rendered by JS -->
+    </div>
+  </main>
+
+  <!-- Modal: Edit / Inspect Class & Homework -->
+  <div id="editModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-[2px] p-0 sm:p-4 modal-backdrop">
+    <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col modal-panel overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h2 id="editModalTitle" class="text-base font-bold text-slate-900 truncate">Редактирование предмета</h2>
+          <p id="editModalSubtitle" class="text-xs text-slate-500">Измените описание, задания или время пары</p>
+        </div>
+        <button id="closeEditModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editClassForm" class="overflow-y-auto px-5 py-4 space-y-4 flex-1">
+        <input type="hidden" id="fieldId" />
+
+        <!-- Homework / Deadlines Section (Primary Focus) -->
+        <div class="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <label class="text-sm font-semibold text-amber-950 flex items-center gap-1.5">
+              <i data-lucide="clipboard-check" class="w-4 h-4 text-amber-600"></i>
+              <span>Что нужно сдать (дедлайны)</span>
+            </label>
+            <label class="inline-flex items-center gap-1.5 text-xs font-medium text-amber-900 cursor-pointer select-none">
+              <input type="checkbox" id="fieldHasDeadline" class="rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+              <span>Отметить сдачу</span>
+            </label>
+          </div>
+
+          <!-- Dynamic checklist inside modal -->
+          <div id="modalTaskList" class="space-y-1.5">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="newTaskInput" placeholder="Добавить пункт задания (например: Кейсы 3–4)..."
+              class="flex-1 text-sm rounded-lg border border-amber-200 bg-white px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+            <button type="button" id="btnAddModalTask"
+              class="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition shrink-0 cursor-pointer">
+              + Добавить
+            </button>
+          </div>
+
+          <div>
+            <label for="fieldNotes" class="block text-xs font-medium text-amber-900 mb-1">Описание / заметки по заданию</label>
+            <textarea id="fieldNotes" rows="3" placeholder="Подробности, ссылки, требования преподавателя..."
+              class="w-full text-sm rounded-lg border border-amber-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 resize-y"></textarea>
+          </div>
+        </div>
+
+        <!-- Subject Metadata -->
+        <div class="space-y-3 pt-1">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="sm:col-span-2">
+              <label for="fieldSubject" class="block text-xs font-medium text-slate-600 mb-1">Название предмета *</label>
+              <input type="text" id="fieldSubject" required placeholder="Например: Введение в историческую науку"
+                class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label for="fieldShort" class="block text-xs font-medium text-slate-600 mb-1">Сокращение</label>
+              <input type="text" id="fieldShort" placeholder="ВВИН, ОРГ..."
+                class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="fieldDay" class="block text-xs font-medium text-slate-600 mb-1">День недели *</label>
+              <select id="fieldDay" class="w-full text-sm rounded-lg border border-slate-200 px-2.5 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="23.11">23.11 (пн)</option>
+                <option value="24.11">24.11 (вт)</option>
+                <option value="25.11">25.11 (ср)</option>
+                <option value="26.11">26.11 (чт)</option>
+                <option value="27.11">27.11 (пт)</option>
+                <option value="28.11">28.11 (сб)</option>
+              </select>
+            </div>
+            <div>
+              <label for="fieldTime" class="block text-xs font-medium text-slate-600 mb-1">Время</label>
+              <input type="text" id="fieldTime" placeholder="08:30 - 10:00"
+                class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+              <label for="fieldRoom" class="block text-xs font-medium text-slate-600 mb-1">Аудитория</label>
+              <input type="text" id="fieldRoom" placeholder="F417"
+                class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+
+          <div>
+            <label for="fieldType" class="block text-xs font-medium text-slate-600 mb-1">Тип занятия</label>
+            <select id="fieldType" class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="Лекционные занятия">Лекционные занятия</option>
+              <option value="Практические занятия">Практические занятия</option>
+              <option value="Мероприятие">Мероприятие</option>
+              <option value="Самостоятельный дедлайн">Самостоятельный дедлайн (без пары)</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-2">
+        <button id="btnDeleteClass" type="button"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <span>Удалить</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="btnCancelEdit" type="button"
+            class="px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-200/70 transition cursor-pointer">
+            Отмена
+          </button>
+          <button id="btnSaveClass" type="submit" form="editClassForm"
+            class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition shadow-sm cursor-pointer">
+            Сохранить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Quick Add Task to Existing Class -->
+  <div id="quickTaskModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-[2px] p-0 sm:p-4 modal-backdrop">
+    <div class="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 modal-panel overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="text-base font-bold text-slate-900">Добавить домашнее задание</h2>
+        <button id="closeQuickTaskModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="quickTaskForm" class="p-5 space-y-4">
+        <div>
+          <label for="quickTaskDay" class="block text-xs font-medium text-slate-600 mb-1">День сдачи</label>
+          <select id="quickTaskDay" class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="23.11">23.11 — Понедельник</option>
+            <option value="24.11">24.11 — Вторник</option>
+            <option value="25.11">25.11 — Среда</option>
+            <option value="26.11">26.11 — Четверг</option>
+            <option value="27.11">27.11 — Пятница</option>
+            <option value="28.11">28.11 — Суббота</option>
+          </select>
+        </div>
+        <div>
+          <label for="quickTaskTarget" class="block text-xs font-medium text-slate-600 mb-1">Предмет в этот день</label>
+          <select id="quickTaskTarget" class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div id="quickNewSubjectWrap" class="hidden">
+          <label for="quickNewSubjectName" class="block text-xs font-medium text-slate-600 mb-1">Название нового предмета / дедлайна</label>
+          <input type="text" id="quickNewSubjectName" placeholder="Например: Английский или ВВИН"
+            class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label for="quickTaskText" class="block text-xs font-medium text-slate-600 mb-1">Что нужно сдать *</label>
+          <input type="text" id="quickTaskText" required placeholder="Например: Подготовить доклад по теме..."
+            class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400" />
+        </div>
+        <div>
+          <label for="quickTaskNote" class="block text-xs font-medium text-slate-600 mb-1">Дополнительное описание (необязательно)</label>
+          <textarea id="quickTaskNote" rows="2" placeholder="Страницы, ссылка на методичку..."
+            class="w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button id="btnCancelQuickTask" type="button" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer">Отмена</button>
+          <button type="submit" class="px-4 py-2 rounded-lg text-sm font-semibold bg-amber-600 text-white hover:bg-amber-700 transition cursor-pointer">Добавить задание</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Telegram Export, Sync & Mini App Guide -->
+  <div id="telegramModal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center bg-slate-900/50 backdrop-blur-[2px] p-0 sm:p-4 modal-backdrop">
+    <div class="bg-white w-full sm:max-w-xl sm:rounded-2xl rounded-t-2xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col modal-panel overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-sky-500 text-white flex items-center justify-center">
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Чат в Telegram</h2>
+            <p class="text-xs text-slate-500">Отправка сводки, синхронизация и запуск в группе</p>
+          </div>
+        </div>
+        <button id="closeTelegramModal" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Tabs inside Telegram modal -->
+      <div class="px-5 pt-3 border-b border-slate-100 flex gap-4 text-sm font-medium">
+        <button type="button" data-tg-tab="post" class="tg-tab pb-2.5 border-b-2 border-sky-500 text-sky-600 cursor-pointer">Текст для чата</button>
+        <button type="button" data-tg-tab="sync" class="tg-tab pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer">Обмен с группой</button>
+        <button type="button" data-tg-tab="miniapp" class="tg-tab pb-2.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800 cursor-pointer">Как закрепить в чате</button>
+      </div>
+
+      <div class="p-5 overflow-y-auto flex-1 space-y-4">
+        <!-- Tab 1: Formatted Telegram Post -->
+        <div id="tgTabPost" class="space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-xs font-medium text-slate-600">Формат сообщения для вашей беседы:</span>
+            <div class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs">
+              <button type="button" id="tgModeDeadlines" class="px-2.5 py-1 rounded-md font-medium bg-white text-slate-900 shadow-sm cursor-pointer">Только дедлайны</button>
+              <button type="button" id="tgModeFull" class="px-2.5 py-1 rounded-md font-medium text-slate-600 cursor-pointer">Всё расписание</button>
+            </div>
+          </div>
+          <textarea id="tgPreviewText" rows="11" readonly
+            class="w-full text-xs sm:text-sm font-mono bg-slate-50 border border-slate-200 rounded-xl p-3 text-slate-800 focus:outline-none"></textarea>
+          <div class="flex items-center justify-end gap-2">
+            <button type="button" id="btnCopyTgText"
+              class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-sky-500 text-white hover:bg-sky-600 transition shadow-sm cursor-pointer">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+              <span>Скопировать для Telegram</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 2: JSON Export/Import for Group Sync -->
+        <div id="tgTabSync" class="hidden space-y-3">
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Чтобы передать обновлённые дедлайны одногруппникам, скопируйте код расписания и скиньте в чат — любой сможет вставить его ниже и сразу увидеть все правки.
+          </p>
+          <div class="flex gap-2">
+            <button type="button" id="btnCopyJson"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Скопировать данные (JSON)</span>
+            </button>
+          </div>
+          <div>
+            <label for="importJsonInput" class="block text-xs font-medium text-slate-600 mb-1">Вставить данные от одногруппника:</label>
+            <textarea id="importJsonInput" rows="5" placeholder='Вставьте сюда скопированный JSON...'
+              class="w-full text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="btnImportJson"
+              class="px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition cursor-pointer">
+              Загрузить расписание
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 3: How to add to Telegram group -->
+        <div id="tgTabMiniapp" class="hidden space-y-3 text-sm text-slate-700">
+          <div class="bg-sky-50 border border-sky-200 rounded-xl p-3.5 text-xs text-sky-900 leading-relaxed">
+            Этот файл полностью автономный — его можно открыть на телефоне прямо внутри Telegram как веб-приложение (Mini App) или по закреплённой ссылке.
+          </div>
+          <ol class="space-y-2.5 text-xs sm:text-sm list-decimal list-inside">
+            <li><span class="font-semibold text-slate-900">Скачайте этот HTML-файл</span> и загрузите на бесплатный хостинг (например, <b>GitHub Pages</b> или <b>Netlify Drop</b> — просто перетащите файл в браузер).</li>
+            <li><span class="font-semibold text-slate-900">Быстрый вариант:</span> отправьте полученную ссылку в чат группы и нажмите «Закрепить».</li>
+            <li><span class="font-semibold text-slate-900">Как Telegram Mini App:</span> создайте бота в <b>@BotFather</b> → <code class="bg-slate-100 px-1 py-0.5 rounded">/newapp</code> → укажите ссылку на файл, и приложение будет открываться прямо внутри Telegram.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm Reset -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-[2px] p-4 modal-backdrop">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 p-5 space-y-4 modal-panel">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900">Сбросить расписание?</h3>
+          <p class="text-xs text-slate-600 mt-1">Все ваши правки, добавленные предметы и отметки будут сброшены к исходному расписанию на 23.11–28.11.</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button id="btnCancelReset" type="button" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 cursor-pointer">Отмена</button>
+        <button id="btnDoReset" type="button" class="px-4 py-2 rounded-lg text-sm font-semibold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer">Сбросить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg toast-enter">
+    Сохранено
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'fefu_schedule_b4126_2026_11_23_v1';
+
+      const DAYS = [
+        { id: '23.11', shortDay: 'пн', fullDay: 'Понедельник', dateLabel: '23 ноября' },
+        { id: '24.11', shortDay: 'вт', fullDay: 'Вторник', dateLabel: '24 ноября' },
+        { id: '25.11', shortDay: 'ср', fullDay: 'Среда', dateLabel: '25 ноября' },
+        { id: '26.11', shortDay: 'чт', fullDay: 'Четверг', dateLabel: '26 ноября' },
+        { id: '27.11', shortDay: 'пт', fullDay: 'Пятница', dateLabel: '27 ноября' },
+        { id: '28.11', shortDay: 'сб', fullDay: 'Суббота', dateLabel: '28 ноября' }
+      ];
+
+      const DEFAULT_CLASSES = [
+        // 23.11 пн
+        {
+          id: 'c-23-1',
+          day: '23.11',
+          time: '08:30 - 10:00',
+          type: 'Лекционные занятия',
+          room: 'F703',
+          subject: 'История первобытного общества и основы археологии',
+          short: 'ИПО',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-23-2',
+          day: '23.11',
+          time: '10:10 - 11:40',
+          type: 'Практические занятия',
+          room: 'F703',
+          subject: 'История первобытного общества и основы археологии',
+          short: 'ИПО',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-23-3',
+          day: '23.11',
+          time: '11:50 - 13:20',
+          type: 'Практические занятия',
+          room: '—',
+          subject: 'Физическая культура и спорт',
+          short: 'Физра',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-23-4',
+          day: '23.11',
+          time: '13:30 - 15:00',
+          type: 'Практические занятия',
+          room: 'F610',
+          subject: 'Основы правовой грамотности',
+          short: 'Право',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+
+        // 24.11 вт — Нет занятий
+
+        // 25.11 ср
+        {
+          id: 'c-25-1',
+          day: '25.11',
+          time: '08:30 - 10:00',
+          type: 'Лекционные занятия',
+          room: 'F417',
+          subject: 'Введение в историческую науку',
+          short: 'ВВИН',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-25-2',
+          day: '25.11',
+          time: '10:10 - 11:40',
+          type: 'Практические занятия',
+          room: 'F417',
+          subject: 'Введение в историческую науку',
+          short: 'ВВИН',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-25-1', text: 'Закончить кейсы 3-4', done: false },
+            { id: 't-25-2', text: 'Закончить индивидуалку', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-25-3',
+          day: '25.11',
+          time: '11:50 - 13:20',
+          type: 'Лекционные занятия',
+          room: 'F315 (F413)',
+          subject: 'Основы российской государственности',
+          short: 'ОРГ',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+
+        // 26.11 чт
+        {
+          id: 'c-26-1',
+          day: '26.11',
+          time: '11:50 - 13:20',
+          type: 'Практические занятия',
+          room: '—',
+          subject: 'Физическая культура и спорт',
+          short: 'Физра',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-26-2',
+          day: '26.11',
+          time: '13:30 - 15:00',
+          type: 'Практические занятия',
+          room: 'F311',
+          subject: 'Иностранный язык',
+          short: 'Английский',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-26-1', text: 'Уточнить домашнее задание по английскому', done: false }
+          ],
+          notes: 'Нажмите на предмет, чтобы вписать конкретное задание.'
+        },
+        {
+          id: 'c-26-3',
+          day: '26.11',
+          time: '15:10 - 16:40',
+          type: 'Практические занятия',
+          room: 'F311',
+          subject: 'Основы российской государственности',
+          short: 'ОРГ',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-26-2', text: 'Рассказ о героях', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-26-4',
+          day: '26.11',
+          time: '16:50 - 18:20',
+          type: 'Мероприятие',
+          room: 'F315 (F413)',
+          subject: 'Психологическая диагностика',
+          short: 'Диагностика',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+
+        // 27.11 пт
+        {
+          id: 'c-27-1',
+          day: '27.11',
+          time: '08:30 - 10:00',
+          type: 'Лекционные занятия',
+          room: 'F417',
+          subject: 'Вспомогательные исторические дисциплины',
+          short: 'ВИД',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-27-1', text: 'Задание уточняется (..)', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-27-2',
+          day: '27.11',
+          time: '10:10 - 11:40',
+          type: 'Лекционные занятия',
+          room: 'F417',
+          subject: 'История России',
+          short: 'ИР',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        },
+        {
+          id: 'c-27-3',
+          day: '27.11',
+          time: '11:50 - 13:20',
+          type: 'Практические занятия',
+          room: 'F417',
+          subject: 'История России',
+          short: 'ИР',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-27-2', text: '1 вопрос полностью', done: false }
+          ],
+          notes: ''
+        },
+
+        // 28.11 сб
+        {
+          id: 'c-28-1',
+          day: '28.11',
+          time: '08:30 - 10:00',
+          type: 'Практические занятия',
+          room: 'F417',
+          subject: 'Вспомогательные исторические дисциплины',
+          short: 'ВИД',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-28-1', text: 'Задание уточняется (..)', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-28-2',
+          day: '28.11',
+          time: '10:10 - 11:40',
+          type: 'Практические занятия',
+          room: 'F417',
+          subject: 'История России (древность и средневековье)',
+          short: 'ДИС',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-28-2', text: 'Подготовка к сдаче (уточнить детали)', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-28-3',
+          day: '28.11',
+          time: '11:50 - 13:20',
+          type: 'Практические занятия',
+          room: 'F315 (F413)',
+          subject: 'Основы российской государственности',
+          short: 'ОРГ',
+          hasDeadline: true,
+          tasks: [
+            { id: 't-28-3', text: 'Подготовка к сдаче (уточнить детали)', done: false }
+          ],
+          notes: ''
+        },
+        {
+          id: 'c-28-4',
+          day: '28.11',
+          time: '13:30 - 15:00',
+          type: 'Лекционные занятия',
+          room: 'F315 (F413)',
+          subject: 'Основы российской государственности',
+          short: 'ОРГ',
+          hasDeadline: false,
+          tasks: [],
+          notes: ''
+        }
+      ];
+
+      // App state
+      let classes = loadState();
+      let activeView = 'all'; // 'all' | '23.11' | ... | '28.11'
+      let onlyDeadlines = false;
+      let modalDraftTasks = [];
+      let tgFormatMode = 'deadlines'; // 'deadlines' | 'full'
+      let toastTimer = null;
+
+      function clone(obj) {
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed;
+          }
+        } catch (e) {
+          // ignore storage errors in sandbox
+        }
+        return clone(DEFAULT_CLASSES);
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(classes));
+        } catch (e) {
+          // ignore storage errors
+        }
+      }
+
+      function showToast(message) {
+        const el = document.getElementById('toast');
+        el.textContent = message;
+        el.classList.remove('hidden');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.classList.add('hidden');
+        }, 2300);
+      }
+
+      function copyTextSafe(text, successMsg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast(successMsg);
+          }).catch(() => fallbackCopy(text, successMsg));
+        } else {
+          fallbackCopy(text, successMsg);
+        }
+      }
+
+      function fallbackCopy(text, successMsg) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast(successMsg);
+        } catch (e) {
+          showToast('Не удалось скопировать — выделите текст вручную');
+        }
+        document.body.removeChild(ta);
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function parseStartMinutes(timeStr) {
+        const m = String(timeStr || '').match(/(\d{1,2}):(\d{2})/);
+        if (!m) return 9999;
+        return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+      }
+
+      function classHasActiveDeadline(item) {
+        const hasPendingTask = Array.isArray(item.tasks) && item.tasks.some(t => !t.done);
+        const hasAnyTask = Array.isArray(item.tasks) && item.tasks.length > 0;
+        return item.hasDeadline || hasPendingTask || (hasAnyTask && !item.tasks.every(t => t.done));
+      }
+
+      function classHasAnyHomework(item) {
+        return item.hasDeadline || (Array.isArray(item.tasks) && item.tasks.length > 0) || Boolean(item.notes && item.notes.trim());
+      }
+
+      function getTypeBadgeStyle(type) {
+        if (type === 'Лекционные занятия') return 'bg-blue-50 text-blue-700 border-blue-200';
+        if (type === 'Практические занятия') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        if (type === 'Мероприятие') return 'bg-purple-50 text-purple-700 border-purple-200';
+        return 'bg-amber-50 text-amber-800 border-amber-200';
+      }
+
+      function getShortTypeLabel(type) {
+        if (type === 'Лекционные занятия') return 'Лекция';
+        if (type === 'Практические занятия') return 'Практика';
+        if (type === 'Мероприятие') return 'Мероприятие';
+        return 'Дедлайн';
+      }
+
+      function updateHeaderStats() {
+        const totalTasks = classes.reduce((acc, c) => acc + (c.tasks ? c.tasks.length : 0), 0);
+        const doneTasks = classes.reduce((acc, c) => acc + (c.tasks ? c.tasks.filter(t => t.done).length : 0), 0);
+        const remaining = totalTasks - doneTasks;
+        const statsEl = document.getElementById('headerStats');
+        if (totalTasks === 0) {
+          statsEl.textContent = 'Нет активных дедлайнов';
+        } else if (remaining === 0) {
+          statsEl.textContent = `Все задания сданы (${doneTasks}/${totalTasks})`;
+        } else {
+          statsEl.textContent = `Осталось сдать: ${remaining} из ${totalTasks}`;
+        }
+      }
+
+      function renderNavStrip() {
+        const nav = document.getElementById('navStrip');
+        const allPending = classes.reduce((acc, c) => acc + (c.tasks ? c.tasks.filter(t => !t.done).length : 0), 0);
+
+        let html = `
+          <button type="button" data-view="all"
+            class="nav-pill shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition border cursor-pointer flex items-center gap-1.5 ${
+              activeView === 'all'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+            }">
+            <span>Вся неделя</span>
+            ${allPending > 0 ? `<span class="px-1.5 py-0.2 rounded-full text-[10px] ${activeView === 'all' ? 'bg-amber-400 text-slate-950' : 'bg-amber-100 text-amber-800'}">${allPending}</span>` : ''}
+          </button>
+        `;
+
+        DAYS.forEach(d => {
+          const dayItems = classes.filter(c => c.day === d.id);
+          const pendingCount = dayItems.reduce((acc, c) => acc + (c.tasks ? c.tasks.filter(t => !t.done).length : 0), 0);
+          const isActive = activeView === d.id;
+
+          html += `
+            <button type="button" data-view="${d.id}"
+              class="nav-pill shrink-0 px-3 py-1.5 rounded-xl text-xs transition border cursor-pointer flex items-center gap-1.5 ${
+                isActive
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-semibold'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 font-medium'
+              }">
+              <span>${d.id} <span class="${isActive ? 'text-blue-100' : 'text-slate-400'}">${d.shortDay}</span></span>
+              ${pendingCount > 0
+                ? `<span class="w-2 h-2 rounded-full ${isActive ? 'bg-amber-300' : 'bg-amber-500'}" title="Есть дедлайны"></span>`
+                : (dayItems.length === 0 ? `<span class="text-[10px] ${isActive ? 'text-blue-200' : 'text-slate-300'}">выходной</span>` : '')
+              }
+            </button>
+          `;
+        });
+
+        nav.innerHTML = html;
+      }
+
+      function renderSchedule() {
+        const root = document.getElementById('scheduleRoot');
+        const visibleDays = activeView === 'all' ? DAYS : DAYS.filter(d => d.id === activeView);
+
+        let html = '';
+
+        visibleDays.forEach(day => {
+          let dayClasses = classes
+            .filter(c => c.day === day.id)
+            .sort((a, b) => parseStartMinutes(a.time) - parseStartMinutes(b.time));
+
+          if (onlyDeadlines) {
+            dayClasses = dayClasses.filter(c => classHasAnyHomework(c));
+          }
+
+          const pendingCount = dayClasses.reduce((acc, c) => acc + (c.tasks ? c.tasks.filter(t => !t.done).length : 0), 0);
+          const allTasksCount = dayClasses.reduce((acc, c) => acc + (c.tasks ? c.tasks.length : 0), 0);
+
+          // In "onlyDeadlines" + "all" mode, skip days with zero homework
+          if (onlyDeadlines && activeView === 'all' && dayClasses.length === 0) {
+            return;
+          }
+
+          html += `
+            <section class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+              <div class="px-4 py-3 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold tracking-wide">${day.id}</span>
+                  <div>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-tight">${day.fullDay}</h2>
+                    <p class="text-[11px] text-slate-500">${day.dateLabel} • ${dayClasses.length === 0 ? 'нет занятий' : pluralClasses(dayClasses.length)}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  ${pendingCount > 0
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-200">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                        Сдать: ${pendingCount}
+                      </span>`
+                    : (allTasksCount > 0
+                      ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                          Всё сдано
+                        </span>`
+                      : '')
+                  }
+                  <button type="button" data-add-day="${day.id}" title="Добавить предмет на ${day.id}"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="p-3 sm:p-4">
+                ${dayClasses.length === 0
+                  ? `<div class="py-6 text-center">
+                      <p class="text-sm text-slate-400">${onlyDeadlines ? 'На этот день нет заданий к сдаче' : 'Нет занятий в этот день'}</p>
+                      <button type="button" data-add-day="${day.id}"
+                        class="mt-2 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 cursor-pointer">
+                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                        Добавить предмет или дедлайн
+                      </button>
+                    </div>`
+                  : `<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      ${dayClasses.map(item => renderClassCard(item)).join('')}
+                    </div>`
+                }
+              </div>
+            </section>
+          `;
+        });
+
+        if (!html) {
+          html = `
+            <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center">
+              <p class="text-sm font-medium text-slate-600">Нет предметов с активными заданиями по текущему фильтру.</p>
+              <button type="button" id="btnClearFilterEmpty" class="mt-2 text-xs font-semibold text-blue-600 hover:underline cursor-pointer">Показать всё расписание</button>
+            </div>
+          `;
+        }
+
+        root.innerHTML = html;
+        updateHeaderStats();
+        renderNavStrip();
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      }
+
+      function pluralClasses(n) {
+        if (n % 10 === 1 && n % 100 !== 11) return `${n} пара`;
+        if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return `${n} пары`;
+        return `${n} пар`;
+      }
+
+      function renderClassCard(item) {
+        const tasks = Array.isArray(item.tasks) ? item.tasks : [];
+        const pendingTasks = tasks.filter(t => !t.done);
+        const allDone = tasks.length > 0 && pendingTasks.length === 0;
+        const hasHw = classHasAnyHomework(item);
+
+        const cardBorder = pendingTasks.length > 0 || (item.hasDeadline && tasks.length === 0)
+          ? 'border-amber-300/90 hover:border-amber-400 bg-white'
+          : allDone
+            ? 'border-emerald-200 hover:border-emerald-300 bg-white'
+            : 'border-slate-200 hover:border-blue-300 bg-white';
+
+        return `
+          <div data-class-card="${item.id}"
+            class="group relative rounded-xl border ${cardBorder} p-3.5 transition shadow-[0_1px_2px_rgba(15,23,42,0.03)] hover:shadow-md cursor-pointer flex flex-col justify-between gap-2.5">
+            <div>
+              <!-- Top row: time + room + type badge -->
+              <div class="flex items-center justify-between gap-2 flex-wrap mb-1.5">
+                <div class="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                  <span class="inline-flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    ${escapeHtml(item.time || 'Весь день')}
+                  </span>
+                  ${item.room && item.room !== '—' && item.room !== '-'
+                    ? `<span class="inline-flex items-center gap-0.5 text-slate-500 font-medium">
+                        <i data-lucide="map-pin" class="w-3 h-3 text-slate-400"></i>
+                        ${escapeHtml(item.room)}
+                      </span>`
+                    : ''
+                  }
+                </div>
+                <span class="text-[11px] font-medium px-2 py-0.5 rounded-md border ${getTypeBadgeStyle(item.type)}">
+                  ${escapeHtml(getShortTypeLabel(item.type))}
+                </span>
+              </div>
+
+              <!-- Subject title -->
+              <div class="flex items-start justify-between gap-2">
+                <h3 class="text-sm font-bold text-slate-900 leading-snug group-hover:text-blue-700 transition">
+                  ${escapeHtml(item.subject)}
+                </h3>
+                ${item.short
+                  ? `<span class="shrink-0 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${escapeHtml(item.short)}</span>`
+                  : ''
+                }
+              </div>
+            </div>
+
+            <!-- Compact Deadline / Homework Block -->
+            ${hasHw ? `
+              <div class="rounded-lg p-2.5 border ${allDone ? 'bg-emerald-50/70 border-emerald-200/80' : 'bg-amber-50/80 border-amber-200/80'} space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1 ${allDone ? 'text-emerald-700' : 'text-amber-800'}">
+                    <i data-lucide="${allDone ? 'check-circle-2' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
+                    ${allDone ? 'Сдано' : 'Что сдать'}
+                  </span>
+                  <span class="text-[10px] text-slate-400 group-hover:text-blue-600 transition flex items-center gap-0.5">
+                    <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
+                    изменить
+                  </span>
+                </div>
+                ${tasks.length > 0 ? `
+                  <ul class="space-y-1">
+                    ${tasks.map(t => `
+                      <li class="flex items-start gap-2 text-xs">
+                        <input type="checkbox" data-toggle-task="${item.id}|${t.id}" ${t.done ? 'checked' : ''}
+                          class="mt-0.5 rounded border-amber-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0" />
+                        <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 font-medium'} leading-snug">${escapeHtml(t.text)}</span>
+                      </li>
+                    `).join('')}
+                  </ul>
+                ` : `<p class="text-xs text-amber-900/80">Есть дедлайн — нажмите, чтобы добавить описание</p>`}
+                ${item.notes && item.notes.trim() ? `
+                  <p class="text-[11px] text-slate-600 border-t border-amber-200/60 pt-1.5 line-clamp-2">${escapeHtml(item.notes)}</p>
+                ` : ''}
+              </div>
+            ` : `
+              <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                <span>Заданий нет</span>
+                <span class="opacity-80 group-hover:opacity-100 group-hover:text-blue-600 transition flex items-center gap-1">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  добавить ДЗ
+                </span>
+              </div>
+            `}
+          </div>
+        `;
+      }
+
+      // ===== Edit / Create Class Modal =====
+      const editModal = document.getElementById('editModal');
+      const editClassForm = document.getElementById('editClassForm');
+
+      function openEditModal(classId, prefillDay) {
+        const isNew = !classId;
+        const item = isNew
+          ? {
+              id: '',
+              day: prefillDay || (activeView !== 'all' ? activeView : '25.11'),
+              time: '08:30 - 10:00',
+              type: 'Практические занятия',
+              room: '',
+              subject: '',
+              short: '',
+              hasDeadline: false,
+              tasks: [],
+              notes: ''
+            }
+          : classes.find(c => c.id === classId);
+
+        if (!item) return;
+
+        document.getElementById('editModalTitle').textContent = isNew ? 'Новый предмет / занятие' : item.subject;
+        document.getElementById('editModalSubtitle').textContent = isNew
+          ? 'Добавьте пару или самостоятельный дедлайн в расписание'
+          : `${item.day} • ${item.time || 'Без времени'} ${item.room && item.room !== '—' ? '• ' + item.room : ''}`;
+
+        document.getElementById('fieldId').value = item.id;
+        document.getElementById('fieldSubject').value = item.subject;
+        document.getElementById('fieldShort').value = item.short || '';
+        document.getElementById('fieldDay').value = item.day;
+        document.getElementById('fieldTime').value = item.time || '';
+        document.getElementById('fieldRoom').value = item.room === '—' ? '' : (item.room || '');
+        document.getElementById('fieldType').value = item.type || 'Практические занятия';
+        document.getElementById('fieldHasDeadline').checked = Boolean(item.hasDeadline || (item.tasks && item.tasks.length > 0));
+        document.getElementById('fieldNotes').value = item.notes || '';
+        document.getElementById('newTaskInput').value = '';
+
+        modalDraftTasks = clone(item.tasks || []);
+        renderModalTasks();
+
+        document.getElementById('btnDeleteClass').classList.toggle('hidden', isNew);
+
+        editModal.classList.remove('hidden');
+        editModal.classList.add('flex');
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      }
+
+      function closeEditModal() {
+        editModal.classList.add('hidden');
+        editModal.classList.remove('flex');
+      }
+
+      function renderModalTasks() {
+        const list = document.getElementById('modalTaskList');
+        if (modalDraftTasks.length === 0) {
+          list.innerHTML = `<p class="text-xs text-amber-800/70 italic">Пока нет пунктов задания — добавьте ниже.</p>`;
+          return;
+        }
+        list.innerHTML = modalDraftTasks.map((t, idx) => `
+          <div class="flex items-center gap-2 bg-white border border-amber-200/80 rounded-lg px-2.5 py-1.5">
+            <input type="checkbox" data-draft-toggle="${idx}" ${t.done ? 'checked' : ''}
+              class="rounded border-amber-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer shrink-0" />
+            <input type="text" data-draft-text="${idx}" value="${escapeHtml(t.text)}"
+              class="flex-1 text-xs sm:text-sm bg-transparent border-0 focus:outline-none ${t.done ? 'line-through text-slate-400' : 'text-slate-800'}" />
+            <button type="button" data-draft-remove="${idx}" title="Удалить пункт"
+              class="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `).join('');
+        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+          window.lucide.createIcons();
+        }
+      }
+
+      function addDraftTaskFromInput() {
+        const input = document.getElementById('newTaskInput');
+        const val = input.value.trim();
+        if (!val) return;
+        modalDraftTasks.push({ id: 't-' + Date.now() + '-' + Math.floor(Math.random() * 1000), text: val, done: false });
+        document.getElementById('fieldHasDeadline').checked = true;
+        input.value = '';
+        renderModalTasks();
+        input.focus();
+      }
+
+      document.getElementById('btnAddModalTask').addEventListener('click', addDraftTaskFromInput);
+      document.getElementById('newTaskInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addDraftTaskFromInput();
+        }
+      });
+
+      document.getElementById('modalTaskList').addEventListener('change', (e) => {
+        if (e.target.hasAttribute('data-draft-toggle')) {
+          const idx = parseInt(e.target.getAttribute('data-draft-toggle'), 10);
+          if (modalDraftTasks[idx]) {
+            modalDraftTasks[idx].done = e.target.checked;
+            renderModalTasks();
+          }
+        }
+      });
+
+      document.getElementById('modalTaskList').addEventListener('input', (e) => {
+        if (e.target.hasAttribute('data-draft-text')) {
+          const idx = parseInt(e.target.getAttribute('data-draft-text'), 10);
+          if (modalDraftTasks[idx]) {
+            modalDraftTasks[idx].text = e.target.value;
+          }
+        }
+      });
+
+      document.getElementById('modalTaskList').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-draft-remove]');
+        if (btn) {
+          const idx = parseInt(btn.getAttribute('data-draft-remove'), 10);
+          modalDraftTasks.splice(idx, 1);
+          renderModalTasks();
+        }
+      });
+
+      editClassForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Include any unsubmitted text in newTaskInput
+        const pendingInput = document.getElementById('newTaskInput').value.trim();
+        if (pendingInput) {
+          modalDraftTasks.push({ id: 't-' + Date.now(), text: pendingInput, done: false });
+        }
+
+        const cleanTasks = modalDraftTasks
+          .map(t => ({ ...t, text: String(t.text || '').trim() }))
+          .filter(t => t.text.length > 0);
+
+        const id = document.getElementById('fieldId').value;
+        const subject = document.getElementById('fieldSubject').value.trim();
+        if (!subject) return;
+
+        const payload = {
+          id: id || ('c-' + Date.now()),
+          day: document.getElementById('fieldDay').value,
+          time: document.getElementById('fieldTime').value.trim() || 'Весь день',
+          type: document.getElementById('fieldType').value,
+          room: document.getElementById('fieldRoom').value.trim() || '—',
+          subject,
+          short: document.getElementById('fieldShort').value.trim(),
+          hasDeadline: document.getElementById('fieldHasDeadline').checked || cleanTasks.length > 0,
+          tasks: cleanTasks,
+          notes: document.getElementById('fieldNotes').value.trim()
+        };
+
+        if (id) {
+          const idx = classes.findIndex(c => c.id === id);
+          if (idx >= 0) classes[idx] = payload;
+          showToast('Изменения сохранены');
+        } else {
+          classes.push(payload);
+          showToast('Предмет добавлен');
+        }
+
+        saveState();
+        closeEditModal();
+        renderSchedule();
+      });
+
+      document.getElementById('btnDeleteClass').addEventListener('click', () => {
+        const id = document.getElementById('fieldId').value;
+        if (!id) return;
+        classes = classes.filter(c => c.id !== id);
+        saveState();
+        closeEditModal();
+        renderSchedule();
+        showToast('Предмет удалён');
+      });
+
+      document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+      document.getElementById('btnCancelEdit').addEventListener('click', closeEditModal);
+      editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) closeEditModal();
+      });
+
+      // ===== Quick Add Task Modal =====
+      const quickTaskModal = document.getElementById('quickTaskModal');
+      const quickTaskDay = document.getElementById('quickTaskDay');
+      const quickTaskTarget = document.getElementById('quickTaskTarget');
+      const quickNewSubjectWrap = document.getElementById('quickNewSubjectWrap');
+
+      function populateQuickTaskTargets(dayId) {
+        const dayClasses = classes
+          .filter(c => c.day === dayId)
+          .sort((a, b) => parseStartMinutes(a.time) - parseStartMinutes(b.time));
+
+        let opts = dayClasses.map(c =>
+          `<option value="${c.id}">${escapeHtml(c.short ? c.short + ' — ' : '')}${escapeHtml(c.subject)} (${escapeHtml(c.time)})</option>`
+        ).join('');
+        opts += `<option value="__new__">+ Создать новый предмет / дедлайн на этот день</option>`;
+        quickTaskTarget.innerHTML = opts;
+        toggleQuickNewSubjectField();
+      }
+
+      function toggleQuickNewSubjectField() {
+        const isNew = quickTaskTarget.value === '__new__';
+        quickNewSubjectWrap.classList.toggle('hidden', !isNew);
+        document.getElementById('quickNewSubjectName').required = isNew;
+      }
+
+      function openQuickTaskModal() {
+        quickTaskDay.value = activeView !== 'all' ? activeView : '25.11';
+        populateQuickTaskTargets(quickTaskDay.value);
+        document.getElementById('quickTaskText').value = '';
+        document.getElementById('quickTaskNote').value = '';
+        document.getElementById('quickNewSubjectName').value = '';
+        quickTaskModal.classList.remove('hidden');
+        quickTaskModal.classList.add('flex');
+      }
+
+      function closeQuickTaskModal() {
+        quickTaskModal.classList.add('hidden');
+        quickTaskModal.classList.remove('flex');
+      }
+
+      quickTaskDay.addEventListener('change', () => populateQuickTaskTargets(quickTaskDay.value));
+      quickTaskTarget.addEventListener('change', toggleQuickNewSubjectField);
+
+      document.getElementById('quickTaskForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dayId = quickTaskDay.value;
+        const targetId = quickTaskTarget.value;
+        const taskText = document.getElementById('quickTaskText').value.trim();
+        const taskNote = document.getElementById('quickTaskNote').value.trim();
+        if (!taskText) return;
+
+        if (targetId === '__new__') {
+          const subjName = document.getElementById('quickNewSubjectName').value.trim() || 'Домашнее задание';
+          classes.push({
+            id: 'c-' + Date.now(),
+            day: dayId,
+            time: 'Весь день',
+            type: 'Самостоятельный дедлайн',
+            room: '—',
+            subject: subjName,
+            short: '',
+            hasDeadline: true,
+            tasks: [{ id: 't-' + Date.now(), text: taskText, done: false }],
+            notes: taskNote
+          });
+        } else {
+          const item = classes.find(c => c.id === targetId);
+          if (item) {
+            item.hasDeadline = true;
+            if (!Array.isArray(item.tasks)) item.tasks = [];
+            item.tasks.push({ id: 't-' + Date.now(), text: taskText, done: false });
+            if (taskNote) {
+              item.notes = item.notes ? (item.notes + '\n' + taskNote) : taskNote;
+            }
+          }
+        }
+
+        saveState();
+        closeQuickTaskModal();
+        renderSchedule();
+        showToast('Задание добавлено');
+      });
+
+      document.getElementById('btnAddTaskQuick').addEventListener('click', openQuickTaskModal);
+      document.getElementById('closeQuickTaskModal').addEventListener('click', closeQuickTaskModal);
+      document.getElementById('btnCancelQuickTask').addEventListener('click', closeQuickTaskModal);
+      quickTaskModal.addEventListener('click', (e) => {
+        if (e.target === quickTaskModal) closeQuickTaskModal();
+      });
+
+      // ===== Telegram Modal =====
+      const telegramModal = document.getElementById('telegramModal');
+
+      function buildTelegramText() {
+        const lines = [];
+        lines.push(tgFormatMode === 'deadlines'
+          ? '📅 ДЕДЛАЙНЫ НА НЕДЕЛЮ (23.11 – 28.11) | Б4126-46.03.01риа'
+          : '📅 РАСПИСАНИЕ И ДЗ (23.11 – 28.11) | Б4126-46.03.01риа');
+        lines.push('');
+
+        DAYS.forEach(d => {
+          const dayItems = classes
+            .filter(c => c.day === d.id)
+            .sort((a, b) => parseStartMinutes(a.time) - parseStartMinutes(b.time));
+
+          if (tgFormatMode === 'deadlines') {
+            const hwItems = dayItems.filter(c => classHasAnyHomework(c));
+            lines.push(`🔹 ${d.id} (${d.shortDay})`);
+            if (hwItems.length === 0) {
+              lines.push('—');
+            } else {
+              hwItems.forEach(item => {
+                const label = item.short || item.subject;
+                lines.push(`• ${label}`);
+                if (item.tasks && item.tasks.length > 0) {
+                  item.tasks.forEach((t, i) => {
+                    const mark = t.done ? '✅' : `${i + 1}.`;
+                    lines.push(`  ${mark} ${t.text}`);
+                  });
+                } else {
+                  lines.push('  (..)');
+                }
+                if (item.notes && item.notes.trim()) {
+                  lines.push(`  📝 ${item.notes.trim()}`);
+                }
+              });
+            }
+            lines.push('');
+          } else {
+            lines.push(`🔹 ${d.id} — ${d.fullDay}`);
+            if (dayItems.length === 0) {
+              lines.push('Нет занятий');
+            } else {
+              dayItems.forEach(item => {
+                const roomStr = item.room && item.room !== '—' ? ` [${item.room}]` : '';
+                lines.push(`• ${item.time}${roomStr} — ${item.subject}`);
+                if (item.tasks && item.tasks.length > 0) {
+                  item.tasks.forEach(t => {
+                    lines.push(`   ${t.done ? '✅' : '📌'} ${t.text}`);
+                  });
+                }
+              });
+            }
+            lines.push('');
+          }
+        });
+
+        return lines.join('\n').trim();
+      }
+
+      function refreshTelegramPreview() {
+        document.getElementById('tgPreviewText').value = buildTelegramText();
+        const btnD = document.getElementById('tgModeDeadlines');
+        const btnF = document.getElementById('tgModeFull');
+        if (tgFormatMode === 'deadlines') {
+          btnD.className = 'px-2.5 py-1 rounded-md font-medium bg-white text-slate-900 shadow-sm cursor-pointer';
+          btnF.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 cursor-pointer';
+        } else {
+          btnF.className = 'px-2.5 py-1 rounded-md font-medium bg-white text-slate-900 shadow-sm cursor-pointer';
+          btnD.className = 'px-2.5 py-1 rounded-md font-medium text-slate-600 cursor-pointer';
+        }
+      }
+
+      function switchTgTab(tabName) {
+        document.querySelectorAll('.tg-tab').forEach(btn => {
+          const active = btn.getAttribute('data-tg-tab') === tabName;
+          btn.className = `tg-tab pb-2.5 border-b-2 cursor-pointer ${active ? 'border-sky-500 text-sky-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`;
+        });
+        document.getElementById('tgTabPost').classList.toggle('hidden', tabName !== 'post');
+        document.getElementById('tgTabSync').classList.toggle('hidden', tabName !== 'sync');
+        document.getElementById('tgTabMiniapp').classList.toggle('hidden', tabName !== 'miniapp');
+      }
+
+      document.getElementById('btnTelegramModal').addEventListener('click', () => {
+        refreshTelegramPreview();
+        switchTgTab('post');
+        telegramModal.classList.remove('hidden');
+        telegramModal.classList.add('flex');
+      });
+
+      document.getElementById('closeTelegramModal').addEventListener('click', () => {
+        telegramModal.classList.add('hidden');
+        telegramModal.classList.remove('flex');
+      });
+
+      telegramModal.addEventListener('click', (e) => {
+        if (e.target === telegramModal) {
+          telegramModal.classList.add('hidden');
+          telegramModal.classList.remove('flex');
+        }
+      });
+
+      document.querySelectorAll('.tg-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTgTab(btn.getAttribute('data-tg-tab')));
+      });
+
+      document.getElementById('tgModeDeadlines').addEventListener('click', () => {
+        tgFormatMode = 'deadlines';
+        refreshTelegramPreview();
+      });
+
+      document.getElementById('tgModeFull').addEventListener('click', () => {
+        tgFormatMode = 'full';
+        refreshTelegramPreview();
+      });
+
+      document.getElementById('btnCopyTgText').addEventListener('click', () => {
+        copyTextSafe(document.getElementById('tgPreviewText').value, 'Скопировано! Вставьте в чат Telegram');
+      });
+
+      document.getElementById('btnCopyJson').addEventListener('click', () => {
+        copyTextSafe(JSON.stringify(classes), 'Данные расписания скопированы');
+      });
+
+      document.getElementById('btnImportJson').addEventListener('click', () => {
+        const raw = document.getElementById('importJsonInput').value.trim();
+        if (!raw) {
+          showToast('Вставьте JSON в поле выше');
+          return;
+        }
+        try {
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) throw new Error('Invalid format');
+          classes = parsed;
+          saveState();
+          renderSchedule();
+          document.getElementById('importJsonInput').value = '';
+          telegramModal.classList.add('hidden');
+          telegramModal.classList.remove('flex');
+          showToast('Расписание успешно обновлено!');
+        } catch (err) {
+          showToast('Ошибка формата: проверьте скопированный текст');
+        }
+      });
+
+      // ===== Reset Modal =====
+      const resetModal = document.getElementById('resetModal');
+      document.getElementById('btnResetConfirm').addEventListener('click', () => {
+        resetModal.classList.remove('hidden');
+        resetModal.classList.add('flex');
+      });
+      document.getElementById('btnCancelReset').addEventListener('click', () => {
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+      });
+      document.getElementById('btnDoReset').addEventListener('click', () => {
+        classes = clone(DEFAULT_CLASSES);
+        saveState();
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+        renderSchedule();
+        showToast('Расписание сброшено к исходному');
+      });
+      resetModal.addEventListener('click', (e) => {
+        if (e.target === resetModal) {
+          resetModal.classList.add('hidden');
+          resetModal.classList.remove('flex');
+        }
+      });
+
+      // ===== Global Event Delegation =====
+      document.getElementById('btnAddClass').addEventListener('click', () => openEditModal(null));
+
+      document.getElementById('toggleOnlyDeadlines').addEventListener('change', (e) => {
+        onlyDeadlines = e.target.checked;
+        renderSchedule();
+      });
+
+      document.getElementById('navStrip').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-view]');
+        if (!btn) return;
+        activeView = btn.getAttribute('data-view');
+        renderSchedule();
+      });
+
+      document.getElementById('scheduleRoot').addEventListener('click', (e) => {
+        // Clear filter button in empty state
+        if (e.target.closest('#btnClearFilterEmpty')) {
+          onlyDeadlines = false;
+          document.getElementById('toggleOnlyDeadlines').checked = false;
+          renderSchedule();
+          return;
+        }
+
+        // Toggle checkbox directly on card without opening modal
+        const checkbox = e.target.closest('[data-toggle-task]');
+        if (checkbox) {
+          e.stopPropagation();
+          const [classId, taskId] = checkbox.getAttribute('data-toggle-task').split('|');
+          const cls = classes.find(c => c.id === classId);
+          if (cls && Array.isArray(cls.tasks)) {
+            const task = cls.tasks.find(t => t.id === taskId);
+            if (task) {
+              task.done = checkbox.checked;
+              saveState();
+              renderSchedule();
+            }
+          }
+          return;
+        }
+
+        // Add class to specific day button
+        const addDayBtn = e.target.closest('[data-add-day]');
+        if (addDayBtn) {
+          e.stopPropagation();
+          openEditModal(null, addDayBtn.getAttribute('data-add-day'));
+          return;
+        }
+
+        // Click on subject card opens editor
+        const card = e.target.closest('[data-class-card]');
+        if (card) {
+          openEditModal(card.getAttribute('data-class-card'));
+        }
+      });
+
+      // Keyboard Escape closes modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeEditModal();
+          closeQuickTaskModal();
+          telegramModal.classList.add('hidden');
+          telegramModal.classList.remove('flex');
+          resetModal.classList.add('hidden');
+          resetModal.classList.remove('flex');
+        }
+      });
+
+      // Initial render
+      renderSchedule();
+    })();
+  </script>
+</body>
+</html>
