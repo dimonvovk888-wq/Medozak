@@ -1,0 +1,67 @@
+{
+  "25.11": [
+    {
+      "subject": "ВВИН",
+      "done": false,
+      "tasks": [
+        {"text": "1. Закончить кейсы 3-4", "assignee": "@ZhenL1", "done": false},
+        {"text": "2. Закончить индивидуалку", "assignee": "@DaraSan0", "done": false}
+      ]
+    }
+  ],
+  "26.11": [
+    {
+      "subject": "Английский",
+      "done": false,
+      "tasks": [
+        {"text": "Проверить задание к паре", "assignee": "", "done": false}
+      ]
+    },
+    {
+      "subject": "ОРГ",
+      "done": false,
+      "tasks": [
+        {"text": "Рассказ о героях", "assignee": "@euwuns", "done": false}
+      ]
+    }
+  ],
+  "27.11": [
+    {
+      "subject": "ВИД",
+      "done": false,
+      "tasks": [
+        {"text": "Уточнить задание (..)", "assignee": "", "done": false}
+      ]
+    },
+    {
+      "subject": "ИР",
+      "done": false,
+      "tasks": [
+        {"text": "1 вопрос полностью", "assignee": "@diceeeeey_lowwe", "done": false}
+      ]
+    }
+  ],
+  "28.11": [
+    {
+      "subject": "ВИД",
+      "done": false,
+      "tasks": [
+        {"text": "Уточнить задание (..)", "assignee": "", "done": false}
+      ]
+    },
+    {
+      "subject": "ДИС",
+      "done": false,
+      "tasks": [
+        {"text": "Подготовка к сдаче", "assignee": "@qasend", "done": false}
+      ]
+    },
+    {
+      "subject": "ОРГ",
+      "done": false,
+      "tasks": [
+        {"text": "Подготовка к сдаче", "assignee": "", "done": false}
+      ]
+    }
+  ]
+}
