@@ -1,8 +1,22 @@
 name: Daily Homework Reminder
 on:
   schedule:
+    - cron: "0 20 * * *"
     - cron: "0 10 * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Режим запуска"
+        required: true
+        default: "evening"
+        type: choice
+        options:
+          - evening
+          - morning
+      test_date:
+        description: "Тестовая дата для evening (например, 25.11) — пусто = завтра"
+        required: false
+        default: ""
 
 jobs:
   send:
@@ -17,4 +31,6 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           TOPIC_ID: ${{ secrets.TOPIC_ID }}
+          TEST_DATE: ${{ github.event.inputs.test_date }}
+          BOT_MODE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode || (github.event.schedule == '0 20 * * *' && 'morning' || 'evening') }}
         run: python remind.py
