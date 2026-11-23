@@ -1,0 +1,67 @@
+{
+  "25.11": [
+    {
+      "subject": "ВВИН",
+      "done": false,
+      "tasks": [
+        {"text": "1. Закончить кейсы 3-4", "assignee": "@ZhenL1", "done": true, "fileName": "cases_3_4.docx"},
+        {"text": "2. Закончить индивидуалку", "assignee": "@DaraSan0", "done": false, "fileName": ""}
+      ]
+    }
+  ],
+  "26.11": [
+    {
+      "subject": "Английский",
+      "done": false,
+      "tasks": [
+        {"text": "Проверить задание к паре", "assignee": "", "done": false, "fileName": ""}
+      ]
+    },
+    {
+      "subject": "ОРГ",
+      "done": false,
+      "tasks": [
+        {"text": "Рассказ о героях", "assignee": "@euwuns", "done": false, "fileName": ""}
+      ]
+    }
+  ],
+  "27.11": [
+    {
+      "subject": "ВИД",
+      "done": false,
+      "tasks": [
+        {"text": "Уточнить задание (..)", "assignee": "", "done": false, "fileName": ""}
+      ]
+    },
+    {
+      "subject": "ИР",
+      "done": false,
+      "tasks": [
+        {"text": "1 вопрос полностью", "assignee": "@diceeeeey_lowwe", "done": false, "fileName": ""}
+      ]
+    }
+  ],
+  "28.11": [
+    {
+      "subject": "ВИД",
+      "done": false,
+      "tasks": [
+        {"text": "Уточнить задание (..)", "assignee": "", "done": false, "fileName": ""}
+      ]
+    },
+    {
+      "subject": "ДИС",
+      "done": false,
+      "tasks": [
+        {"text": "Подготовка к сдаче", "assignee": "@qasend", "done": false, "fileName": ""}
+      ]
+    },
+    {
+      "subject": "ОРГ",
+      "done": false,
+      "tasks": [
+        {"text": "Подготовка к сдаче", "assignee": "", "done": false, "fileName": ""}
+      ]
+    }
+  ]
+}
